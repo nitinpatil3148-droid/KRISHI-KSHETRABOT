@@ -1,6 +1,5 @@
 
 import os
-import textwrap
 import requests
 import streamlit as st
 from datetime import datetime
@@ -54,7 +53,7 @@ def log(message):
     st.session_state.activity = st.session_state.activity[:10]
 
 # ==================================================
-# 4. BACKEND COMMUNICATION
+# 4. SEND COMMAND TO BACKEND
 # ==================================================
 
 def send_command(command, description):
@@ -84,7 +83,7 @@ def send_command(command, description):
         return False
 
 # ==================================================
-# 5. ESP32 CONNECTION STATUS
+# 5. GET ESP32 CONNECTION STATUS
 # ==================================================
 
 def get_device_status():
@@ -102,6 +101,7 @@ def get_device_status():
         response.raise_for_status()
 
         data = response.json()
+
         return data.get("device_connected", False)
 
     except requests.RequestException:
@@ -159,7 +159,7 @@ def emergency():
         st.session_state.rover_status = "Emergency Stopped"
 
 # ==================================================
-# 9. DASHBOARD CSS
+# 9. DASHBOARD DESIGN
 # ==================================================
 
 st.markdown("""
@@ -362,14 +362,6 @@ div.st-key-emergency button{
     margin-top:6px;
 }
 
-.bottom{
-    background:#f2fff0;
-    border:2px solid #08722a;
-    border-radius:16px;
-    padding:8px 12px;
-    margin-top:10px;
-}
-
 @media(max-width:760px){
 
     .hero{
@@ -404,7 +396,7 @@ else:
     connection_text = "🔴 ESP32 Not Connected"
     connection_color = "#c90000"
 
-header_html = textwrap.dedent(f"""
+header_html = f"""
 <div class="hero">
     <div>
         <div class="brand">🌿 Agricultural Rover</div>
@@ -417,7 +409,7 @@ header_html = textwrap.dedent(f"""
         </span>
     </div>
 </div>
-""")
+"""
 
 st.markdown(
     header_html,
@@ -434,7 +426,7 @@ left, center, right = st.columns(
 )
 
 # ==================================================
-# 12. LEFT PANEL - ROVER MOVEMENT
+# 12. LEFT PANEL - MOVEMENT
 # ==================================================
 
 with left:
@@ -455,7 +447,11 @@ with left:
                 key="move_f",
                 use_container_width=True
             ):
-                movement("F", "Moving Forward", "Forward")
+                movement(
+                    "F",
+                    "Moving Forward",
+                    "Forward"
+                )
 
         a, b, c = st.columns(3, gap="small")
 
@@ -466,7 +462,11 @@ with left:
                 key="move_l",
                 use_container_width=True
             ):
-                movement("L", "Turning Left", "Left")
+                movement(
+                    "L",
+                    "Turning Left",
+                    "Left"
+                )
 
         with b:
 
@@ -475,7 +475,11 @@ with left:
                 key="move_s",
                 use_container_width=True
             ):
-                movement("S", "Stopped", "Stop")
+                movement(
+                    "S",
+                    "Stopped",
+                    "Stop"
+                )
 
         with c:
 
@@ -484,7 +488,11 @@ with left:
                 key="move_r",
                 use_container_width=True
             ):
-                movement("R", "Turning Right", "Right")
+                movement(
+                    "R",
+                    "Turning Right",
+                    "Right"
+                )
 
         _, down, _ = st.columns(3)
 
@@ -495,7 +503,11 @@ with left:
                 key="move_b",
                 use_container_width=True
             ):
-                movement("B", "Moving Backward", "Backward")
+                movement(
+                    "B",
+                    "Moving Backward",
+                    "Backward"
+                )
 
         st.markdown(
             '<div class="note">Movement controls</div>',
@@ -515,22 +527,20 @@ with center:
             unsafe_allow_html=True
         )
 
-        rover_html = textwrap.dedent(f"""
-        <div class="rover-stage">
-            <div class="rover-icon">🚜</div>
+        rover_html = f"""
+<div class="rover-stage">
+    <div class="rover-icon">🚜</div>
 
-            <div class="rover-status">
-                🚜 &nbsp; Rover Status:
-                <span class="pill">
-                    {st.session_state.rover_status}
-                </span>
-            </div>
-        </div>
+    <div class="rover-status">
+        🚜 Rover Status:
+        <span class="pill">{st.session_state.rover_status}</span>
+    </div>
+</div>
 
-        <div class="note">
-            3D rover model and free camera view will be integrated next.
-        </div>
-        """)
+<div class="note">
+    3D rover model and free camera view will be integrated next.
+</div>
+"""
 
         st.markdown(
             rover_html,
@@ -607,17 +617,24 @@ with st.container(border=True):
             status_text = "🔴 ESP32 Not Connected"
             status_color = "#c90000"
 
+        status_html = f"""
+<div>
+    <strong>📋 System Status:</strong>
+    <span style="color:{status_color};font-weight:800">
+        {status_text}
+    </span>
+</div>
+"""
+
         st.markdown(
-            f"**📋 System Status:** "
-            f"<span style='color:{status_color};font-weight:800'>"
-            f"{status_text}</span>",
+            status_html,
             unsafe_allow_html=True
         )
 
     with s2:
 
         if st.button(
-            "⚠️  EMERGENCY STOP",
+            "⚠️ EMERGENCY STOP",
             key="emergency",
             use_container_width=True
         ):
