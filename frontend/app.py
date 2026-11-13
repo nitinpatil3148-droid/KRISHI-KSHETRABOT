@@ -36,7 +36,7 @@ html,body,[data-testid="stAppViewContainer"]{font-family:Inter,sans-serif;backgr
 .connection{background:#fff;color:#14271a;border:2px solid #18bd31;border-radius:50px;padding:10px 18px;font-weight:800;font-size:clamp(12px,1.25vw,17px);}
 [data-testid="stHorizontalBlock"]{gap:clamp(8px,1.2vw,18px)!important;align-items:stretch;}
 [data-testid="column"]{min-width:0!important;}
-[data-testid="stVerticalBlockBorderWrapper"]{background:linear-gradient(145deg,#fff,#eff9ed);border:1.5px solid #83b98a;border-radius:18px;box-shadow:0 3px 9px #164b2020;padding:.6rem!important;}
+[data-testid="stVerticalBlockBorderWrapper"]{background:linear-gradient(145deg,#fff,#eff9ed);border:1.5px solid #83b98a;border-radius:18px;box-shadow:0 3px 9px #164b2020;padding:.6rem!important;}\n/* Give the three main dashboard cards a consistent desktop height. */\ndiv[data-testid="stHorizontalBlock"] > div[data-testid="column"] > div[data-testid="stVerticalBlockBorderWrapper"]{min-height:430px;}\n/* The bottom status strip should remain compact. */\n[data-testid="stVerticalBlockBorderWrapper"]:has(div.st-key-emergency){min-height:0!important;}
 .panel-title{background:linear-gradient(90deg,#00551c,#003e16);color:white;border-radius:12px;padding:12px 8px;text-align:center;font-weight:850;font-size:clamp(16px,1.5vw,23px);margin-bottom:10px;}
 div.st-key-move_f button,div.st-key-move_l button,div.st-key-move_s button,div.st-key-move_r button,div.st-key-move_b button{min-height:clamp(58px,8vh,88px);font-size:clamp(14px,1.2vw,19px);font-weight:850;border-radius:16px;background:linear-gradient(145deg,#087d24,#004817);color:white;border:2px solid #159b2b;box-shadow:0 3px 7px #003e1d35;}
 div.st-key-move_s button{background:linear-gradient(145deg,#ff4035,#c90000);border-color:#ff9a8f;}
@@ -50,7 +50,7 @@ div.st-key-func_cutter button[kind="primary"],div.st-key-func_pump button[kind="
 div.st-key-emergency button{min-height:55px;background:linear-gradient(180deg,#ff4035,#c90000);color:white;border:3px solid #ff9a8f;font-weight:900;font-size:clamp(15px,1.4vw,20px);box-shadow:0 0 12px #ef1d1d77;}
 .note{text-align:center;color:#55705a;font-size:11px;margin-top:6px;}
 .bottom{background:#f2fff0;border:2px solid #08722a;border-radius:16px;padding:8px 12px;margin-top:10px;}
-@media(max-width:760px){.hero{justify-content:center;text-align:center;}.block-container{padding:.35rem .45rem .8rem;}.rover-stage{height:270px;}}
+@media(max-width:760px){.hero{justify-content:center;text-align:center;}.block-container{padding:.35rem .45rem .8rem;} .rover-stage{height:270px;} div[data-testid="stHorizontalBlock"] > div[data-testid="column"] > div[data-testid="stVerticalBlockBorderWrapper"]{min-height:0;} }
 </style>
 """, unsafe_allow_html=True)
 
@@ -111,17 +111,16 @@ with right:
                         toggle(name); st.rerun()
         st.markdown('<div class="note">Tap once to activate · tap again to deactivate</div>', unsafe_allow_html=True)
 
-st.markdown('<div class="bottom">', unsafe_allow_html=True)
-s1,s2,s3 = st.columns([1.1,1.2,1], vertical_alignment="center")
-with s1:
-    st.markdown("**📋 System Status:** <span style='color:#a66b00;font-weight:800'>Not connected</span>", unsafe_allow_html=True)
-with s2:
-    if st.button("⚠️  EMERGENCY STOP", key="emergency", use_container_width=True):
-        emergency(); st.rerun()
-with s3:
-    with st.expander("📄 Activity Log"):
-        for entry in st.session_state.activity:
-            st.write("• " + entry)
-st.markdown('</div>', unsafe_allow_html=True)
+with st.container(border=True):
+    s1,s2,s3 = st.columns([1.1,1.2,1], vertical_alignment="center")
+    with s1:
+        st.markdown("**📋 System Status:** <span style='color:#a66b00;font-weight:800'>Not connected</span>", unsafe_allow_html=True)
+    with s2:
+        if st.button("⚠️  EMERGENCY STOP", key="emergency", use_container_width=True):
+            emergency(); st.rerun()
+    with s3:
+        with st.expander("📄 Activity Log"):
+            for entry in st.session_state.activity:
+                st.write("• " + entry)
 
 st.caption("Dashboard preview only — controls are not yet connected to the ESP32. Use a physical power cutoff for hardware emergencies.")
