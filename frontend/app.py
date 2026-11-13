@@ -1,6 +1,11 @@
+import os
+import requests
 import streamlit as st
 from datetime import datetime
 
+BACKEND_URL = os.getenv("BACKEND_URL", "").rstrip("/")
+DASHBOARD_API_KEY = os.getenv("DASHBOARD_API_KEY", "")
+API_HEADERS = {"X-Dashboard-Key": DASHBOARD_API_KEY}
 st.set_page_config(page_title="Agricultural Rover Control System", page_icon="🌱", layout="wide")
 
 if "functions" not in st.session_state:
@@ -13,6 +18,25 @@ if "rover_status" not in st.session_state:
 def log(message):
     st.session_state.activity.insert(0, f"{datetime.now():%H:%M:%S}  {message}")
     st.session_state.activity = st.session_state.activity[:10]
+
+def send_command(command, description):
+    if not BACKEND_URL or not DASHBOARD_API_KEY:
+        st.error("Backend settings are missing in Render.")
+        return False
+
+    try:
+        response = requests.post(
+            f"{BACKEND_URL}/api/command",
+            json={"command": command},
+            headers=API_HEADERS,
+            timeout=8,
+        )
+        response.raise_for_status()
+        log(f"{description} sent")
+        return True
+    except requests.RequestException:
+        st.error(f"Could not send {description}. Check backend connection.")
+        return False
 
 def toggle(name):
     st.session_state.functions[name] = not st.session_state.functions[name]
