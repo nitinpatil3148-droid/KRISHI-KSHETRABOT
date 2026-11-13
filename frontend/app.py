@@ -1,12 +1,13 @@
 
 import os
+import textwrap
 import requests
 import streamlit as st
 from datetime import datetime
 
-# --------------------------------------------------
-# CONFIGURATION
-# --------------------------------------------------
+# ==================================================
+# 1. CONFIGURATION
+# ==================================================
 
 st.set_page_config(
     page_title="Agricultural Rover Control System",
@@ -21,9 +22,9 @@ API_HEADERS = {
     "X-Dashboard-Key": DASHBOARD_API_KEY
 }
 
-# --------------------------------------------------
-# SESSION STATE
-# --------------------------------------------------
+# ==================================================
+# 2. SESSION STATE
+# ==================================================
 
 if "functions" not in st.session_state:
     st.session_state.functions = {
@@ -41,9 +42,9 @@ if "activity" not in st.session_state:
 if "rover_status" not in st.session_state:
     st.session_state.rover_status = "Ready"
 
-# --------------------------------------------------
-# ACTIVITY LOG
-# --------------------------------------------------
+# ==================================================
+# 3. ACTIVITY LOG
+# ==================================================
 
 def log(message):
     st.session_state.activity.insert(
@@ -52,9 +53,9 @@ def log(message):
     )
     st.session_state.activity = st.session_state.activity[:10]
 
-# --------------------------------------------------
-# BACKEND COMMAND FUNCTION
-# --------------------------------------------------
+# ==================================================
+# 4. BACKEND COMMUNICATION
+# ==================================================
 
 def send_command(command, description):
 
@@ -82,9 +83,9 @@ def send_command(command, description):
         )
         return False
 
-# --------------------------------------------------
-# DEVICE CONNECTION STATUS
-# --------------------------------------------------
+# ==================================================
+# 5. ESP32 CONNECTION STATUS
+# ==================================================
 
 def get_device_status():
 
@@ -109,18 +110,18 @@ def get_device_status():
 
 device_connected = get_device_status()
 
-# --------------------------------------------------
-# ROVER MOVEMENT
-# --------------------------------------------------
+# ==================================================
+# 6. ROVER MOVEMENT
+# ==================================================
 
 def movement(command, status, description):
 
     if send_command(command, description):
         st.session_state.rover_status = status
 
-# --------------------------------------------------
-# AGRICULTURAL FUNCTIONS
-# --------------------------------------------------
+# ==================================================
+# 7. AGRICULTURAL FUNCTIONS
+# ==================================================
 
 def toggle(name):
 
@@ -144,9 +145,9 @@ def toggle(name):
     if send_command(command, f"{name} {action}"):
         st.session_state.functions[name] = not currently_on
 
-# --------------------------------------------------
-# EMERGENCY STOP
-# --------------------------------------------------
+# ==================================================
+# 8. EMERGENCY STOP
+# ==================================================
 
 def emergency():
 
@@ -157,9 +158,9 @@ def emergency():
 
         st.session_state.rover_status = "Emergency Stopped"
 
-# --------------------------------------------------
-# DASHBOARD DESIGN
-# --------------------------------------------------
+# ==================================================
+# 9. DASHBOARD CSS
+# ==================================================
 
 st.markdown("""
 <style>
@@ -392,9 +393,9 @@ div.st-key-emergency button{
 </style>
 """, unsafe_allow_html=True)
 
-# --------------------------------------------------
-# HEADER
-# --------------------------------------------------
+# ==================================================
+# 10. HEADER
+# ==================================================
 
 if device_connected:
     connection_text = "🟢 ESP32 Connected"
@@ -403,9 +404,8 @@ else:
     connection_text = "🔴 ESP32 Not Connected"
     connection_color = "#c90000"
 
-st.markdown(f"""
+header_html = textwrap.dedent(f"""
 <div class="hero">
-
     <div>
         <div class="brand">🌿 Agricultural Rover</div>
         <div class="sub">━━ Control System ━━</div>
@@ -416,22 +416,26 @@ st.markdown(f"""
             {connection_text}
         </span>
     </div>
-
 </div>
-""", unsafe_allow_html=True)
+""")
 
-# --------------------------------------------------
-# MAIN DASHBOARD
-# --------------------------------------------------
+st.markdown(
+    header_html,
+    unsafe_allow_html=True
+)
+
+# ==================================================
+# 11. MAIN DASHBOARD COLUMNS
+# ==================================================
 
 left, center, right = st.columns(
     [1, 1.12, 1],
     gap="small"
 )
 
-# --------------------------------------------------
-# LEFT PANEL - MOVEMENT
-# --------------------------------------------------
+# ==================================================
+# 12. LEFT PANEL - ROVER MOVEMENT
+# ==================================================
 
 with left:
 
@@ -451,11 +455,7 @@ with left:
                 key="move_f",
                 use_container_width=True
             ):
-                movement(
-                    "F",
-                    "Moving Forward",
-                    "Forward"
-                )
+                movement("F", "Moving Forward", "Forward")
 
         a, b, c = st.columns(3, gap="small")
 
@@ -466,11 +466,7 @@ with left:
                 key="move_l",
                 use_container_width=True
             ):
-                movement(
-                    "L",
-                    "Turning Left",
-                    "Left"
-                )
+                movement("L", "Turning Left", "Left")
 
         with b:
 
@@ -479,11 +475,7 @@ with left:
                 key="move_s",
                 use_container_width=True
             ):
-                movement(
-                    "S",
-                    "Stopped",
-                    "Stop"
-                )
+                movement("S", "Stopped", "Stop")
 
         with c:
 
@@ -492,11 +484,7 @@ with left:
                 key="move_r",
                 use_container_width=True
             ):
-                movement(
-                    "R",
-                    "Turning Right",
-                    "Right"
-                )
+                movement("R", "Turning Right", "Right")
 
         _, down, _ = st.columns(3)
 
@@ -507,20 +495,16 @@ with left:
                 key="move_b",
                 use_container_width=True
             ):
-                movement(
-                    "B",
-                    "Moving Backward",
-                    "Backward"
-                )
+                movement("B", "Moving Backward", "Backward")
 
         st.markdown(
             '<div class="note">Movement controls</div>',
             unsafe_allow_html=True
         )
 
-# --------------------------------------------------
-# CENTER PANEL - ROVER VIEW
-# --------------------------------------------------
+# ==================================================
+# 13. CENTER PANEL - ROVER VIEW
+# ==================================================
 
 with center:
 
@@ -531,9 +515,8 @@ with center:
             unsafe_allow_html=True
         )
 
-        st.markdown(f"""
+        rover_html = textwrap.dedent(f"""
         <div class="rover-stage">
-
             <div class="rover-icon">🚜</div>
 
             <div class="rover-status">
@@ -542,17 +525,21 @@ with center:
                     {st.session_state.rover_status}
                 </span>
             </div>
-
         </div>
 
         <div class="note">
             3D rover model and free camera view will be integrated next.
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
-# --------------------------------------------------
-# RIGHT PANEL - AGRICULTURAL FUNCTIONS
-# --------------------------------------------------
+        st.markdown(
+            rover_html,
+            unsafe_allow_html=True
+        )
+
+# ==================================================
+# 14. RIGHT PANEL - AGRICULTURAL FUNCTIONS
+# ==================================================
 
 with right:
 
@@ -600,9 +587,9 @@ with right:
             unsafe_allow_html=True
         )
 
-# --------------------------------------------------
-# BOTTOM PANEL - STATUS AND EMERGENCY
-# --------------------------------------------------
+# ==================================================
+# 15. BOTTOM PANEL - SYSTEM STATUS
+# ==================================================
 
 with st.container(border=True):
 
@@ -644,9 +631,9 @@ with st.container(border=True):
             for entry in st.session_state.activity:
                 st.write("• " + entry)
 
-# --------------------------------------------------
-# FOOTER
-# --------------------------------------------------
+# ==================================================
+# 16. FOOTER
+# ==================================================
 
 st.caption(
     "Dashboard commands are sent to the backend and queued "
