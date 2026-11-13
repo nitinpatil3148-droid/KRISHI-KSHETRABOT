@@ -38,6 +38,10 @@ def send_command(command, description):
         st.error(f"Could not send {description}. Check backend connection.")
         return False
 
+def movement(command, status, description):
+    if send_command(command, description):
+        st.session_state.rover_status = status
+
 def toggle(name):
     st.session_state.functions[name] = not st.session_state.functions[name]
     log(f"{name} {'ON' if st.session_state.functions[name] else 'OFF'}")
